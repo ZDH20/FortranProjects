@@ -3,7 +3,7 @@
 
 ! VECTOR ARRAY
 ! DOUBLES THE LENGTH OF THE ARRAY WHEN .EQ. CURRENT NUMBER OF ELEMENTS
-! MAX NUMBER OF ELEMENTS (WITHOUT MAKEPRECISE())):      8GB RAM: 536870912
+! MAX NUMBER OF ELEMENTS (WITHOUT MAKEPRECISE()):      8GB RAM: 536870912, 16GB RAM: 1073741824
 !
 !
 ! OVERVIEW
@@ -20,7 +20,7 @@
 !   MUTE()          - MUTES ALL PRINTS
 !   SORT()          - SORTS THE VECTOR
 
-MODULE VECTORMOD
+MODULE I_VECTORMOD
     IMPLICIT NONE
     PRIVATE
 
@@ -78,7 +78,7 @@ CONTAINS
         END IF
         DEALLOCATE(SELF%ARR)
         IF(SELF%M .EQV. .FALSE.) THEN
-            PRINT*,
+            PRINT*,''
             PRINT*, '---ENDING INFORMATION---'
             PRINT*, 'ELEMENTS IN VECTOR:', SELF%CURRENTSIZE
             PRINT*, 'MAXSIZE:           ', SELF%MAXSIZE
@@ -93,6 +93,7 @@ CONTAINS
         DO I = 1, SELF%GETSIZE() - 1
             DO J = 1, SELF%GETSIZE() - i
                 IF(SELF%ARR(J) .GT. SELF%ARR(J + 1)) THEN
+                    PRINT*, 'SWAPPING: ', SELF%ARR(J), 'WITH: ', SELF%ARR(J + 1)
                     TEMP = SELF%ARR(J)
                     SELF%ARR(J) = SELF%ARR(J + 1)
                     SELF%ARR(J + 1) = TEMP
@@ -193,13 +194,13 @@ CONTAINS
         IMPLICIT NONE
         CLASS(VECTOR), INTENT(IN)::SELF
         INTEGER::I
-        PRINT*,
+        PRINT*,''
         PRINT*, '   ---PRINTING---'
         DO I = 1, SELF%CURRENTSIZE
             PRINT*, SELF%ARR(I)
         END DO
         PRINT*, ' ---END PRINTING---'
-        PRINT*,
+        PRINT*,''
     END SUBROUTINE PRINT
 
     SUBROUTINE RESIZE(SELF)
@@ -262,4 +263,4 @@ CONTAINS
         END DO
     END FUNCTION HAS
 
-END MODULE VECTORMOD
+END MODULE I_VECTORMOD
