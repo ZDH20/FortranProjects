@@ -68,6 +68,7 @@ contains
 
     ! public subroutines
     pure subroutine add_vertex_to_graph(this, data)
+
         implicit none
 
         class(graph), intent(inout)::this
@@ -82,9 +83,11 @@ contains
         end if
 
         this%size = this%size + 1
+
     end subroutine add_vertex_to_graph
 
     pure subroutine add_edge_to_graph(this, source, destination, cost)
+
         implicit none
 
         class(graph), intent(inout)::this
@@ -122,9 +125,11 @@ contains
         else
             allocate(save%neighbors, source = e_constr(destination, cost))
         end if
+
     end subroutine add_edge_to_graph
 
     subroutine print_graph(this)
+
         implicit none
 
         class(graph), intent(in)::this
@@ -142,9 +147,11 @@ contains
             end do
             nav => nav%next
         end do
+
     end subroutine print_graph
 
     pure subroutine destroy_graph(this)
+
         implicit none
 
         class(graph), intent(inout)::this
@@ -164,17 +171,22 @@ contains
             this%head => this%head%next
             deallocate(temp%data)
         end do
+
     end subroutine destroy_graph
 
     ! public functions
     integer function get_graph_size(this)
+
         implicit none
+    
         class(graph), intent(in)::this
         get_graph_size = this%size
+    
     end function get_graph_size
 
     real function get_cost_of_edge(this, source, destination)
-        implicit none
+
+    implicit none
 
         class(graph), intent(in)::this
         integer, intent(in)::source, destination
@@ -191,6 +203,7 @@ contains
             if(nav%data .eq. source) exit
             nav => nav%next
         end do
+
         if(.not. associated(nav)) return
 
         p => nav%neighbors
@@ -202,23 +215,30 @@ contains
             end if
             p => p%next
         end do
+
     end function get_cost_of_edge
 
     ! private subroutines
 
     ! private functions
     pure function vertex_constructor(data)
+
         integer, intent(in)::data
         type(vertex)::vertex_constructor
+
         allocate(vertex_constructor%data, source = data)
+
     end function vertex_constructor
 
     pure function edge_constructor(destination, cost)
+        
         integer, intent(in)::destination
         real, intent(in)::cost
         type(edge)::edge_constructor
+        
         allocate(edge_constructor%data, source = destination)
         allocate(edge_constructor%cost, source = cost)
+    
     end function edge_constructor
 
 end module graphmod
