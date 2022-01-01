@@ -202,7 +202,6 @@ contains
             end if
             p => p%next
         end do
-
     end function get_cost_of_edge
 
     ! private subroutines
