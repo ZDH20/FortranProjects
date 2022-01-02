@@ -86,13 +86,14 @@ contains
 
     end subroutine add_vertex_to_graph
 
-    pure subroutine add_edge_to_graph(this, source, destination, cost)
+    recursive pure subroutine add_edge_to_graph(this, source, destination, cost, undirected)
 
         implicit none
 
         class(graph), intent(inout)::this
         integer, intent(in)::source, destination
         real, intent(in)::cost
+        logical, optional, intent(in)::undirected
 
         class(vertex), pointer::nav
         class(edge), pointer::temp
@@ -125,6 +126,11 @@ contains
         else
             allocate(save%neighbors, source = e_constr(destination, cost))
         end if
+
+        if(present(undirected)) then
+            if(undirected .eqv. .true.) call addedge(this, destination, source, cost, .false.)
+        end if
+
 
     end subroutine add_edge_to_graph
 
