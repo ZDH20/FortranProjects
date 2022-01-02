@@ -1,17 +1,41 @@
+!------------------------------------------------------------------------------
+! adjacency list graph
+!------------------------------------------------------------------------------
+!
+! module: graphmod
+!
+!> @author
+!> zachary haskins}
+!
+! description: 
+!> provides support for creating graphs using the adjacency list method
+!
+! revision history:
+! 1/1/2022 - initial version
+! 1/2/2022 - added support for adding undirected edges. cleaned up code. - 1.0.1
+!------------------------------------------------------------------------------
 module graphmod
     implicit none
     private
 
-    ! derrived types
+    ! public derrived types
     public::graph
 
+    ! private derrived types
+    private::edge
+    private::vertex
+
     ! public subroutines
-    public::addvertex, addedge, print, destroy
+    public::addvertex
+    public::addedge
+    public::print
+    public::destroy
 
     ! public functions
-    public::size, costof
+    public::size
+    public::costof
 
-    ! types
+    ! type definitions
     type edge
         integer, allocatable::data
         real, allocatable::cost
