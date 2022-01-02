@@ -1,16 +1,16 @@
 !------------------------------------------------------------------------------
-! adjacency list graph
+! Adjacency List Graph
 !------------------------------------------------------------------------------
 !
-! module: graphmod
+! MODULE: graphmod
 !
 !> @author
 !> zachary haskins}
 !
-! description: 
+! DESCRIPTION: 
 !> provides support for creating graphs using the adjacency list method
 !
-! revision history:
+! REVISION HISTORY:
 ! 1/1/2022 - initial version
 ! 1/2/2022 - added support for adding undirected edges. cleaned up code. - 1.0.1
 !------------------------------------------------------------------------------
