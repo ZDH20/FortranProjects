@@ -1,134 +1,134 @@
-! AUTHOR: ZACHARY HASKINS
-! DATE: 1/1/2022
-! DYNAMIC STACK
+! author: zachary haskins
+! date: 1/1/2022
+! dynamic stack
 
-MODULE STACKMOD
-    IMPLICIT NONE
-    PRIVATE
+module stackmod
+    implicit none
+    private
 
-    ! DERRIVED TYPES
-    PUBLIC::STACK
+    ! derrived types
+    public::stack
     
-    ! PUBLIC SUBROUTINES
-    PUBLIC::PUSH, DESTROY, POP 
+    ! public subroutines
+    public::push, destroy, pop 
 
-    ! PUBLIC FUNCTIONS
-    PUBLIC::TOP, EMPTY, SIZE
+    ! public functions
+    public::top, empty, size
 
-    ! TYPES
-    TYPE NODE
-        INTEGER, ALLOCATABLE::DATA
-        CLASS(NODE), POINTER::NEXT => NULL()
-    END TYPE NODE
+    ! types
+    type node
+        integer, allocatable::data
+        class(node), pointer::next => null()
+    end type node
 
-    TYPE STACK
-        CLASS(NODE), POINTER::HEAD => NULL()
-        INTEGER::SIZE
-    END TYPE STACK
+    type stack
+        class(node), pointer::head => null()
+        integer::size
+    end type stack
 
-    ! INTERFACES
-    INTERFACE PUSH
-        PROCEDURE::PUSH_NODE
-    END INTERFACE PUSH
+    ! interfaces
+    interface push
+        procedure::push_node
+    end interface push
 
-    INTERFACE EMPTY
-        PROCEDURE::CHECK_IF_EMPTY
-    END INTERFACE EMPTY
+    interface empty
+        procedure::check_if_empty
+    end interface empty
 
-    INTERFACE SIZE
-        PROCEDURE::GET_SIZE
-    END INTERFACE SIZE
+    interface size
+        procedure::get_size
+    end interface size
 
-    INTERFACE TOP
-        PROCEDURE::GET_TOP
-    END INTERFACE TOP
+    interface top
+        procedure::get_top
+    end interface top
 
-    INTERFACE POP
-        PROCEDURE::POP_NODE
-    END INTERFACE POP
+    interface pop
+        procedure::pop_node
+    end interface pop
 
-    INTERFACE DESTROY
-        PROCEDURE::DESTROY_STACK
-    END INTERFACE DESTROY
+    interface destroy
+        procedure::destroy_stack
+    end interface destroy
 
-    INTERFACE NODE
-        PROCEDURE N_CONSTR
-    END INTERFACE NODE
+    interface node
+        procedure n_constr
+    end interface node
 
-CONTAINS
+contains
 
-    ! PUBLIC SUBROUTINES
-    PURE SUBROUTINE PUSH_NODE(THIS, DATA)
-        IMPLICIT NONE
-        CLASS(STACK), INTENT(INOUT)::THIS
-        INTEGER, INTENT(IN)::DATA
-        CLASS(NODE), POINTER::TEMP 
-        IF(.NOT. ASSOCIATED(THIS%HEAD)) THEN
-            ALLOCATE(THIS%HEAD, SOURCE = N_CONSTR(DATA))
-        ELSE
-            TEMP => THIS%HEAD
-            ALLOCATE(THIS%HEAD, SOURCE = N_CONSTR(DATA))
-            THIS%HEAD%NEXT => TEMP 
-        END IF
-        THIS%SIZE = THIS%SIZE + 1
-    END SUBROUTINE PUSH_NODE
+    ! public subroutines
+    pure subroutine push_node(this, data)
+        implicit none
+        class(stack), intent(inout)::this
+        integer, intent(in)::data
+        class(node), pointer::temp 
+        if(.not. associated(this%head)) then
+            allocate(this%head, source = n_constr(data))
+        else
+            temp => this%head
+            allocate(this%head, source = n_constr(data))
+            this%head%next => temp 
+        end if
+        this%size = this%size + 1
+    end subroutine push_node
 
-    PURE SUBROUTINE POP_NODE(THIS)
-        IMPLICIT NONE
-        CLASS(STACK), INTENT(INOUT)::THIS
-        CLASS(NODE), POINTER::TEMP
-        IF(ASSOCIATED(THIS%HEAD)) THEN
-            TEMP => THIS%HEAD
-            THIS%HEAD => THIS%HEAD%NEXT
-            DEALLOCATE(TEMP%DATA)
-            THIS%SIZE = THIS%SIZE - 1
-        END IF
-    END SUBROUTINE POP_NODE
+    pure subroutine pop_node(this)
+        implicit none
+        class(stack), intent(inout)::this
+        class(node), pointer::temp
+        if(associated(this%head)) then
+            temp => this%head
+            this%head => this%head%next
+            deallocate(temp%data)
+            this%size = this%size - 1
+        end if
+    end subroutine pop_node
 
-    PURE SUBROUTINE DESTROY_STACK(THIS)
-        IMPLICIT NONE
-        CLASS(STACK), INTENT(INOUT)::THIS
-        CLASS(NODE), POINTER::TEMP 
-        DO WHILE(ASSOCIATED(THIS%HEAD))
-            TEMP => THIS%HEAD
-            THIS%HEAD => THIS%HEAD%NEXT
-            DEALLOCATE(TEMP%DATA)
-        END DO
-        THIS%SIZE = 0
-    END SUBROUTINE DESTROY_STACK
+    pure subroutine destroy_stack(this)
+        implicit none
+        class(stack), intent(inout)::this
+        class(node), pointer::temp 
+        do while(associated(this%head))
+            temp => this%head
+            this%head => this%head%next
+            deallocate(temp%data)
+        end do
+        this%size = 0
+    end subroutine destroy_stack
 
-    ! PUBLIC FUNCTIONS
-    LOGICAL FUNCTION CHECK_IF_EMPTY(THIS)
-        IMPLICIT NONE
-        CLASS(STACK), INTENT(IN)::THIS
-        CHECK_IF_EMPTY = .TRUE.
-        IF(ASSOCIATED(THIS%HEAD)) THEN
-            CHECK_IF_EMPTY = .FALSE.
-        END IF 
-    END FUNCTION CHECK_IF_EMPTY
+    ! public functions
+    logical function check_if_empty(this)
+        implicit none
+        class(stack), intent(in)::this
+        check_if_empty = .true.
+        if(associated(this%head)) then
+            check_if_empty = .false.
+        end if 
+    end function check_if_empty
 
-    INTEGER FUNCTION GET_TOP(THIS)
-        IMPLICIT NONE
-        CLASS(STACK), INTENT(IN)::THIS
-        GET_TOP = -999 
-        IF(ASSOCIATED(THIS%HEAD)) THEN
-            GET_TOP = THIS%HEAD%DATA
-        END IF
-    END FUNCTION GET_TOP
+    integer function get_top(this)
+        implicit none
+        class(stack), intent(in)::this
+        get_top = -999 
+        if(associated(this%head)) then
+            get_top = this%head%data
+        end if
+    end function get_top
 
-    INTEGER FUNCTION GET_SIZE(THIS)
-        IMPLICIT NONE
-        CLASS(STACK), INTENT(IN)::THIS
-        GET_SIZE = THIS%SIZE
-    END FUNCTION GET_SIZE
+    integer function get_size(this)
+        implicit none
+        class(stack), intent(in)::this
+        get_size = this%size
+    end function get_size
 
-    ! PRIVATE SUBROUTINES
+    ! private subroutines
 
-    ! PRIVATE FUNCTIONS
-    PURE FUNCTION N_CONSTR(DATA)
-        INTEGER, INTENT(IN)::DATA
-        TYPE(NODE)::N_CONSTR
-        ALLOCATE(N_CONSTR%DATA, SOURCE = DATA) 
-    END FUNCTION N_CONSTR
+    ! private functions
+    pure function n_constr(data)
+        integer, intent(in)::data
+        type(node)::n_constr
+        allocate(n_constr%data, source = data) 
+    end function n_constr
 
-END MODULE STACKMOD
+end module stackmod
