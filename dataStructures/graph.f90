@@ -5,14 +5,14 @@
 ! MODULE: graphmod
 !
 !> @author
-!> zachary haskins}
+!> Zachary Haskins}
 !
 ! DESCRIPTION: 
-!> provides support for creating graphs using the adjacency list method
+!> Provides support for creating graphs using the adjacency list method
 !
 ! REVISION HISTORY:
-! 1/1/2022 - initial version
-! 1/2/2022 - added support for adding undirected edges. cleaned up code. - 1.0.1
+! 1/1/2022 - Initial version.
+! 1/2/2022 - Added support for adding undirected edges. Cleaned up code. - 1.0.1
 !------------------------------------------------------------------------------
 module graphmod
     implicit none
