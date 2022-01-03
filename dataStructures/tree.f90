@@ -13,6 +13,7 @@ module treemod
     public::insert
     public::print
     public::destroy
+    public::contains
 
     ! private subroutines
 
@@ -41,10 +42,18 @@ module treemod
         procedure::destroy_tree
     end interface destroy
 
+    interface contains
+        procedure::does_tree_contain
+    end interface contains
+
     ! private interfaces
     interface newnode
         procedure::node_constructor
     end interface newnode
+
+    interface reccontain
+        procedure::recursive_does_tree_contain
+    end interface reccontain
 
     interface recinsert
         procedure::recursive_insert
@@ -97,6 +106,16 @@ contains
     end subroutine destroy_tree
 
     ! public functions
+    logical function does_tree_contain(this, data)
+
+        implicit none
+
+        class(tree), intent(inout)::this
+        integer, intent(in)::data
+
+        does_tree_contain = recursive_does_tree_contain(this, this%root, data)
+
+    end function does_tree_contain
 
     ! private subroutines
     recursive pure subroutine recursive_destroy(this, nav)
@@ -152,6 +171,28 @@ contains
     end subroutine recursive_print
 
     ! private functions
+    recursive logical function recursive_does_tree_contain(this, nav, data) result(result)
+
+        implicit none
+
+        class(tree), intent(in)::this
+        class(node), pointer, intent(inout)::nav
+        integer, intent(in)::data
+
+        result = .false.
+
+        if(.not. associated(nav)) return ! not found
+
+        if(data .gt. nav%data) then
+            result = recursive_does_tree_contain(this, nav%right, data)
+        else if(data .lt. nav%data) then
+            result = recursive_does_tree_contain(this, nav%left, data)
+        else
+            result = .true.
+        end if
+
+    end function recursive_does_tree_contain
+
     pure function node_constructor(data)
 
         integer, intent(in)::data
