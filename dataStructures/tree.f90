@@ -14,6 +14,7 @@ module treemod
     public::print
     public::destroy
     public::contains
+    public::remove
 
     ! private subroutines
 
@@ -46,6 +47,10 @@ module treemod
         procedure::does_tree_contain
     end interface contains
 
+    interface remove
+        procedure::remove_from_tree
+    end interface remove
+
     ! private interfaces
     interface newnode
         procedure::node_constructor
@@ -67,6 +72,14 @@ module treemod
         procedure::recursive_destroy
     end interface recdestroy
 
+    interface recremove
+        procedure::recursive_remove_from_tree
+    end interface recremove
+
+    interface findmin
+        procedure::find_minimum_node
+    end interface findmin
+
 contains
 
     ! public subroutines
@@ -86,6 +99,20 @@ contains
         call recursive_insert(this, this%root, data)
 
     end subroutine insert_into_tree
+
+    subroutine remove_from_tree(this, data)
+
+        implicit none
+
+        class(tree), intent(inout)::this
+        integer, intent(in)::data
+
+        if(.not. associated(this%root)) return ! if tree is empty
+        if(.not. contains(this, data)) return ! assert, temporary
+
+        this%root => recremove(this, this%root, data) ! begin searching for the node to delete
+
+    end subroutine remove_from_tree
 
     subroutine print_tree(this)
 
@@ -171,6 +198,49 @@ contains
     end subroutine recursive_print
 
     ! private functions
+    recursive function recursive_remove_from_tree(this, nav, data) result(result)
+
+        implicit none
+
+        class(tree), intent(inout)::this
+        class(node), pointer, intent(inout)::nav
+        integer, intent(in)::data
+        class(node), pointer::result
+        class(node), pointer::temp => null()
+
+        if(.not. associated(nav)) result => nav
+
+        if(data .lt. nav%data) then
+            nav%left => recremove(this, nav%left, data)
+        else if(data .gt. nav%data) then
+            nav%right => recremove(this, nav%right, data)
+        else ! found node
+            if(.not. associated(nav%left) .and. .not. associated(nav%right)) then 
+                temp => nav
+                nav => null()
+                deallocate(temp)
+            else if(.not. associated(nav%left) .and. associated(nav%right)) then ! right child
+                temp => nav%right
+                ! swap node contents
+                deallocate(temp)
+            else if(associated(nav%left) .and. .not. associated(nav%right)) then ! left child
+                temp => nav%left
+                ! swap node contents
+                deallocate(temp)
+            else
+                temp => findmin(this, nav%right) ! find the min node
+                nav%data = temp%data
+                nav%right => recremove(this, nav%right, nav%data)
+            end if
+        end if
+
+        if(.not. associated(nav)) then
+            result => nav
+            return
+        end if
+
+    end function recursive_remove_from_tree
+
     recursive logical function recursive_does_tree_contain(this, nav, data) result(result)
 
         implicit none
@@ -192,6 +262,20 @@ contains
         end if
 
     end function recursive_does_tree_contain
+
+    function find_minimum_node(this, nav)
+
+        class(tree), intent(in)::this
+        class(node), pointer, intent(inout)::nav
+        type(node), pointer::find_minimum_node
+
+        do while(associated(nav) .and. associated(nav%left))
+            nav => nav%left
+        end do
+
+        find_minimum_node => nav
+
+    end function find_minimum_node
 
     pure function node_constructor(data)
 
