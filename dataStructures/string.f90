@@ -27,7 +27,7 @@ module stringmod
         integer::                                       maxsize
         integer::                                       index
         integer::                                       panic
-        logical, private::                              precise, created = .false.
+        logical, private::                              big, created = .false.
     end type string
 
     ! public interfaces
@@ -84,7 +84,7 @@ contains
         implicit none
 
         class(string), intent(inout)::this
-        character(*) ,intent(in)::data
+        character(*), intent(in), optional::data
         integer::i
 
         this%currentsize = 0
@@ -96,9 +96,13 @@ contains
 
         this%created = .true.
 
-        do i = 1, len(data)
-            call append(this, data(i:i))
-        end do
+        if(len(data) > 100) this%big = .true.
+
+        if(present(data)) then
+            do i = 1, len(data)
+                call append(this, data(i:i))
+            end do
+        end if
 
     end subroutine initialize_string
 
@@ -122,6 +126,8 @@ contains
         character(len = 1), intent(in)::data
 
         if(this%created .eqv. .false.) return
+
+        if(this%maxsize .eq. 256) this%big = .true.
 
         if(this%index .gt. this%maxsize) call resize(this)
 
@@ -152,21 +158,14 @@ contains
         class(string), intent(in)::this
         integer::i
 
+        if(.not. this%created) return
+
         do i = 1, this%currentsize
             write(*, "(A)", advance = "no") this%arr(i)
         end do
         print*, ''
 
     end subroutine print_string
-
-    pure subroutine make_string_save_memory(this)
-
-        implicit none
-
-        class(string), intent(inout)::this
-        this%precise = .true.
-
-    end subroutine make_string_save_memory
 
     pure subroutine replace_data_at_index(this, index, data)
 
@@ -245,7 +244,12 @@ contains
         character(len = 1), dimension(this%currentsize)::newarr
         integer::i, multiple
 
-        multiple = this%currentsize + 1
+        if(this%big) then
+            multiple = this%currentsize * 2
+        else
+            multiple = this%currentsize + 1
+        end if
+        
         this%maxsize = multiple
 
         do i = 1, this%currentsize
@@ -255,7 +259,9 @@ contains
         deallocate(this%arr)
         allocate(this%arr(multiple))
 
-        this%arr = newarr
+        do i = 1, size(newarr)
+            this%arr(i) = newarr(i)
+        end do
 
     end subroutine resize_string
 
