@@ -15,6 +15,7 @@ module treemod
     public::destroy
     public::contains
     public::remove
+    public::size
 
     ! private subroutines
 
@@ -38,6 +39,10 @@ module treemod
     interface print
         procedure::print_tree
     end interface print
+
+    interface size
+        procedure::get_size_of_tree
+    end interface size
 
     interface destroy
         procedure::destroy_tree
@@ -73,16 +78,23 @@ module treemod
     end interface recdestroy
 
     interface recremove
-        procedure::recursive_remove_from_tree
+        procedure::recursive_remove
     end interface recremove
-
-    interface findmin
-        procedure::find_minimum_node
-    end interface findmin
 
 contains
 
     ! public subroutines
+    pure subroutine remove_from_tree(this, data)
+
+        implicit none
+
+        class(tree), intent(inout)::this
+        integer, intent(in)::data
+
+        call recremove(this, this%root, data)
+
+    end subroutine remove_from_tree
+
     pure subroutine insert_into_tree(this, data)
 
         implicit none
@@ -100,20 +112,6 @@ contains
 
     end subroutine insert_into_tree
 
-    subroutine remove_from_tree(this, data)
-
-        implicit none
-
-        class(tree), intent(inout)::this
-        integer, intent(in)::data
-
-        if(.not. associated(this%root)) return ! if tree is empty
-        if(.not. contains(this, data)) return ! assert, temporary
-
-        this%root => recremove(this, this%root, data) ! begin searching for the node to delete
-
-    end subroutine remove_from_tree
-
     subroutine print_tree(this)
 
         implicit none
@@ -129,6 +127,7 @@ contains
 
         class(tree), intent(inout)::this
         call recdestroy(this, this%root)
+        this%size = 0
 
     end subroutine destroy_tree
 
@@ -143,6 +142,15 @@ contains
         does_tree_contain = recursive_does_tree_contain(this, this%root, data)
 
     end function does_tree_contain
+
+    integer function get_size_of_tree(this)
+
+        implicit none
+
+        class(tree), intent(in)::this
+        get_size_of_tree = this%size
+
+    end function get_size_of_tree
 
     ! private subroutines
     recursive pure subroutine recursive_destroy(this, nav)
@@ -197,50 +205,56 @@ contains
 
     end subroutine recursive_print
 
-    ! private functions
-    recursive function recursive_remove_from_tree(this, nav, data) result(result)
+    recursive pure subroutine recursive_remove(this, nav, data)
 
         implicit none
 
         class(tree), intent(inout)::this
         class(node), pointer, intent(inout)::nav
         integer, intent(in)::data
-        class(node), pointer::result
-        class(node), pointer::temp => null()
+        class(node), pointer::temp
 
-        if(.not. associated(nav)) result => nav
+        temp => null()
 
-        if(data .lt. nav%data) then
-            nav%left => recremove(this, nav%left, data)
-        else if(data .gt. nav%data) then
-            nav%right => recremove(this, nav%right, data)
-        else ! found node
-            if(.not. associated(nav%left) .and. .not. associated(nav%right)) then 
-                temp => nav
-                nav => null()
-                deallocate(temp)
-            else if(.not. associated(nav%left) .and. associated(nav%right)) then ! right child
+        if(.not. associated(nav)) return ! value not in tree
+
+        if(data .gt. nav%data) then
+            call recremove(this, nav%right, data)
+        else if(data .lt. nav%data) then
+            call recremove(this, nav%left, data)
+        else ! found node to delete
+            if(.not. associated(nav%right) .and. .not. associated(nav%left)) then
+                ! leaf node
+                deallocate(nav)
+            else if(.not. associated(nav%left) .and. associated(nav%right)) then
+                ! right child
                 temp => nav%right
-                ! swap node contents
+                nav%left => temp%left
+                nav%right => temp%right
+                nav%data = temp%data
                 deallocate(temp)
-            else if(associated(nav%left) .and. .not. associated(nav%right)) then ! left child
+            else if(associated(nav%left) .and. .not. associated(nav%right)) then
+                ! left child
                 temp => nav%left
-                ! swap node contents
+                nav%left => temp%left
+                nav%right => temp%right
+                nav%data = temp%data
                 deallocate(temp)
             else
-                temp => findmin(this, nav%right) ! find the min node
+                ! need to find successor node
+                temp => nav%right
+                do while(associated(temp%left))
+                    temp => temp%left
+                end do
                 nav%data = temp%data
-                nav%right => recremove(this, nav%right, nav%data)
+                call recremove(this, nav%right, nav%data)
             end if
+            this%size = this%size - 1
         end if
 
-        if(.not. associated(nav)) then
-            result => nav
-            return
-        end if
+    end subroutine recursive_remove
 
-    end function recursive_remove_from_tree
-
+    ! private functions
     recursive logical function recursive_does_tree_contain(this, nav, data) result(result)
 
         implicit none
@@ -262,20 +276,6 @@ contains
         end if
 
     end function recursive_does_tree_contain
-
-    function find_minimum_node(this, nav)
-
-        class(tree), intent(in)::this
-        class(node), pointer, intent(inout)::nav
-        type(node), pointer::find_minimum_node
-
-        do while(associated(nav) .and. associated(nav%left))
-            nav => nav%left
-        end do
-
-        find_minimum_node => nav
-
-    end function find_minimum_node
 
     pure function node_constructor(data)
 
