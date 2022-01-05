@@ -1,5 +1,5 @@
 !------------------------------------------------------------------------------
-! Character Array String v1.0.4
+! Character Array String v1.0.5
 !------------------------------------------------------------------------------
 !
 ! MODULE: stringmod
@@ -12,10 +12,14 @@
 !
 ! REVISION HISTORY:
 ! 1/4/2022 - Initial Version
-! 1/5/2022 - Added the equal() function                     - v1.0.1
-! 1/6/2022 - Added the remove() and trim() functions        - v1.0.2
-! 1/6/2022 - Added safety to functions.                     - v1.0.3
-! 1/6/2022 - Overloaded function equal() to accept strings  - v1.0.4 (current)
+! 1/5/2022 - Added the equal() function                      - v1.0.1
+! 1/6/2022 - Added the remove() function 
+!            Added the  trim() function                      - v1.0.2
+! 1/6/2022 - Added safety to functions.                      - v1.0.3
+! 1/6/2022 - Overloaded function equal() to accept strings   - v1.0.4
+! 1/6/2022 - Added concat() function (overloaded)
+!            removed assign() function                       
+!            removed clear() function                        - v1.0.5 (current)
 !------------------------------------------------------------------------------
 module stringmod
 
@@ -29,13 +33,13 @@ module stringmod
     public::init
     public::destroy
     public::append
-    public::assign
+    public::concat
     public::print
     public::replace
-    public::clear
     public::equal
     public::remove
     public::trim
+    public::toint
 
     ! public functions
     public::size
@@ -65,6 +69,10 @@ module stringmod
         procedure::remove_front_and_back_whitespace
     end interface trim
 
+    interface toint
+        procedure::string_to_integer
+    end interface toint
+
     interface remove 
         procedure::remove_item_in_string
     end interface remove 
@@ -73,9 +81,10 @@ module stringmod
         procedure::append_to_string
     end interface append
 
-    interface assign
-        procedure::assign_to_string
-    end interface assign
+    interface concat
+        procedure::concatinate_string_to_character
+        procedure::concatinate_string_to_string
+    end interface concat
 
     interface print
         procedure::print_string
@@ -96,10 +105,6 @@ module stringmod
     interface replace
         procedure::replace_data_at_index
     end interface replace
-
-    interface clear
-        procedure::clear_string
-    end interface clear
 
     interface equal
         procedure::check_if_equal
@@ -193,7 +198,6 @@ contains
         class(string), intent(inout)::this
 
         if(.not. this%created) return
-
         deallocate(this%arr)
 
     end subroutine destroy_string
@@ -217,7 +221,7 @@ contains
 
     end subroutine append_to_string
 
-    subroutine assign_to_string(this, data)
+    subroutine concatinate_string_to_character(this, data)
 
         implicit none
 
@@ -231,7 +235,23 @@ contains
             call append(this, data(i:i))
         end do
 
-    end subroutine assign_to_string
+    end subroutine concatinate_string_to_character
+
+    subroutine concatinate_string_to_string(this, otherstring)
+
+        implicit none
+
+        class(string), intent(inout)::this
+        class(string), intent(in)::otherstring
+        integer::i
+
+        if(.not. this%created) return
+
+        do i = 1, size(otherstring)
+            call append(this, get(otherstring, i))
+        end do       
+
+    end subroutine concatinate_string_to_string
 
     subroutine print_string(this)
 
@@ -263,17 +283,17 @@ contains
 
     end subroutine replace_data_at_index
 
-    subroutine clear_string(this)
+    ! public functions
+    integer function string_to_integer(this) result(res)
 
         implicit none
 
-        class(string), intent(inout)::this
-        deallocate(this%arr)
-        call init(this, '')
+        class(string), intent(in)::this
 
-    end subroutine clear_string
+        res = ichar('4')
 
-    ! public functions
+    end function string_to_integer
+
     logical function check_if_equal(this, comparison) result(res)
 
         implicit none
