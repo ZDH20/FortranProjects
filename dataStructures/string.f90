@@ -12,9 +12,10 @@
 !
 ! REVISION HISTORY:
 ! 1/4/2022 - Initial Version
-! 1/5/2022 - Added the equal() function                 - v1.0.1
-! 1/6/2022 - Added the remove() and trim() functions    - v1.0.2
-! 1/6/2022 - Added safety to functions.                 - v1.0.3
+! 1/5/2022 - Added the equal() function                     - v1.0.1
+! 1/6/2022 - Added the remove() and trim() functions        - v1.0.2
+! 1/6/2022 - Added safety to functions.                     - v1.0.3
+! 1/6/2022 - Overloaded function equal() to accept strings  - v1.0.4
 !------------------------------------------------------------------------------
 module stringmod
 
@@ -104,6 +105,10 @@ module stringmod
         procedure::check_if_equal
     end interface equal
 
+    interface equal
+        procedure::check_if_equal_strings
+    end interface equal
+
     ! private interfaces
     interface resize
         procedure::resize_string
@@ -158,28 +163,6 @@ contains
         this%currentsize = this%currentsize - 1
 
     end subroutine remove_item_in_string
-
-    logical function check_if_equal(this, comparison) result(res)
-
-        implicit none
-
-        class(string), intent(in)::this
-        character(*), intent(in)::comparison
-        integer::i
-
-        if(.not. this%created) return
-
-        res = .false.
-
-        if(this%currentsize .ne. len(comparison)) return
-
-        do i = 1, this%currentsize
-            if(this%arr(i) .ne. comparison(i:i)) return
-        end do
-
-        res = .true.
-
-    end function check_if_equal
 
     pure subroutine remove_front_and_back_whitespace(this)
 
@@ -291,6 +274,50 @@ contains
     end subroutine clear_string
 
     ! public functions
+    logical function check_if_equal(this, comparison) result(res)
+
+        implicit none
+
+        class(string), intent(in)::this
+        character(*), intent(in)::comparison
+        integer::i
+
+        if(.not. this%created) return
+
+        res = .false.
+
+        if(this%currentsize .ne. len(comparison)) return
+
+        do i = 1, this%currentsize
+            if(this%arr(i) .ne. comparison(i:i)) return
+        end do
+
+        res = .true.
+
+    end function check_if_equal
+
+    logical function check_if_equal_strings(this, comparison) result(res)
+
+        implicit none
+
+        class(string), intent(in)::this
+        class(string), intent(in)::comparison
+        integer::i
+
+        if(.not. this%created) return
+
+        res = .false.
+
+        if(this%currentsize .ne. size(comparison)) return
+
+        do i = 1, this%currentsize
+            if(this%arr(i) .ne. get(comparison, i)) return
+        end do
+
+        res = .true.
+
+    end function check_if_equal_strings
+
     integer function get_string_size(this)
 
         implicit none
@@ -321,7 +348,7 @@ contains
         end do
 
     end function does_string_contain
-
+    
     character(len = 1) function retrieve_item_in_string(this, index) result(result)
 
         implicit none
