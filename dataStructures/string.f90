@@ -1,3 +1,19 @@
+!------------------------------------------------------------------------------
+! Character Array String
+!------------------------------------------------------------------------------
+!
+! MODULE: stringmod
+!
+!> @author
+!> Zachary Haskins}
+!
+! DESCRIPTION: 
+!> Provides string support using a character array.
+!
+! REVISION HISTORY:
+! 1/4/2022 - Initial Version
+! 1/5/2022 - Added the equal() function - v1.0.1 
+!------------------------------------------------------------------------------
 module stringmod
 
     implicit none
@@ -14,7 +30,6 @@ module stringmod
     public::print
     public::replace
     public::clear
-    public::equal
 
     ! public functions
     public::size
@@ -72,10 +87,6 @@ module stringmod
         procedure::clear_string
     end interface clear
 
-    interface equal
-        procedure::check_if_equal
-    end interface equal
-
     ! private interfaces
     interface resize
         procedure::resize_string
@@ -110,26 +121,6 @@ contains
         end if
 
     end subroutine initialize_string
-
-    logical function check_if_equal(this, comparison) result(res)
-
-        implicit none
-
-        class(string), intent(in)::this
-        character(*), intent(in)::comparison
-        integer::i
-
-        res = .false.
-
-        if(this%currentsize .ne. len(comparison)) return
-
-        do i = 1, this%currentsize
-            if(this%arr(i) .ne. comparison(i:i)) return
-        end do
-
-        res = .true.
-
-    end function check_if_equal
 
     pure subroutine destroy_string(this)
 
@@ -211,7 +202,9 @@ contains
         implicit none
 
         class(string), intent(inout)::this
+
         deallocate(this%arr)
+
         call init(this, '')
 
     end subroutine clear_string
