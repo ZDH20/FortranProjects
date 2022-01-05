@@ -12,7 +12,9 @@
 !
 ! REVISION HISTORY:
 ! 1/4/2022 - Initial Version
-! 1/5/2022 - Added the equal() function - v1.0.1 
+! 1/5/2022 - Added the equal() function                 - v1.0.1
+! 1/6/2022 - Added the remove() and trim() functions    - v1.0.2
+! 1/6/2022 - Added safety to functions.                 - v1.0.3
 !------------------------------------------------------------------------------
 module stringmod
 
@@ -31,6 +33,8 @@ module stringmod
     public::replace
     public::clear
     public::equal
+    public::remove
+    public::trim
 
     ! public functions
     public::size
@@ -55,6 +59,14 @@ module stringmod
     interface destroy
         procedure::destroy_string
     end interface destroy
+
+    interface trim
+        procedure::remove_front_and_back_whitespace
+    end interface trim
+
+    interface remove 
+        procedure::remove_item_in_string
+    end interface remove 
 
     interface append
         procedure::append_to_string
@@ -127,6 +139,26 @@ contains
 
     end subroutine initialize_string
 
+    pure subroutine remove_item_in_string(this, index)
+
+        implicit none
+
+        class(string), intent(inout)::this
+        integer, intent(in)::index
+        integer::i
+
+        if(.not. this%created) return
+
+        if(index .gt. this%currentsize) return
+
+        do i = index, this%currentsize - 1
+            this%arr(i) = this%arr(i + 1)
+        end do
+
+        this%currentsize = this%currentsize - 1
+
+    end subroutine remove_item_in_string
+
     logical function check_if_equal(this, comparison) result(res)
 
         implicit none
@@ -134,6 +166,8 @@ contains
         class(string), intent(in)::this
         character(*), intent(in)::comparison
         integer::i
+
+        if(.not. this%created) return
 
         res = .false.
 
@@ -147,13 +181,35 @@ contains
 
     end function check_if_equal
 
+    pure subroutine remove_front_and_back_whitespace(this)
+
+        implicit none
+
+        class(string), intent(inout)::this
+
+        if(.not. this%created) return
+
+        do
+            if(this%currentsize .eq. 0) return
+            if(this%arr(1) .ne. ' ') exit
+            call remove(this, 1)
+        end do
+
+        do
+            if(this%currentsize .eq. 0) return
+            if(this%arr(this%currentsize) .ne. ' ') exit 
+            call remove(this, this%currentsize)
+        end do
+
+    end subroutine remove_front_and_back_whitespace
+
     pure subroutine destroy_string(this)
 
         implicit none
 
         class(string), intent(inout)::this
 
-        if(this%created .eqv. .false.) return
+        if(.not. this%created) return
 
         deallocate(this%arr)
 
@@ -166,7 +222,7 @@ contains
         class(string), intent(inout)::this
         character(len = 1), intent(in)::data
 
-        if(this%created .eqv. .false.) return
+        if(.not. this%created) return
 
         if(this%maxsize .eq. 256) this%big = .true.
 
@@ -185,6 +241,8 @@ contains
         class(string), intent(inout)::this
         character(*), intent(in)::data
         integer::i
+
+        if(.not. this%created) return
 
         do i = 1, len(data)
             call append(this, data(i:i))
@@ -216,7 +274,7 @@ contains
         character(len = 1), intent(in)::data
         integer, intent(in)::index
 
-        if(this%created .eqv. .false.) return
+        if(.not. this%created) return
 
         this%arr(index) = data
 
@@ -252,6 +310,8 @@ contains
         integer::i
 
         does_string_contain = .false.
+        
+        if(.not. this%created) return
 
         do i = 1, size(this)
             if(this%arr(i) .eq. data) then
@@ -268,8 +328,11 @@ contains
 
         class(string), intent(in)::this
         integer, intent(in)::index
+        
+        result = '|'
 
-        result = 'z'
+        if(.not. this%created) return
+
         if(index .le. this%maxsize) result = this%arr(index)
 
     end function retrieve_item_in_string
