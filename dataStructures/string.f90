@@ -15,7 +15,7 @@
 ! 1/5/2022 - Added the equal() function                     - v1.0.1
 ! 1/6/2022 - Added the remove() and trim() functions        - v1.0.2
 ! 1/6/2022 - Added safety to functions.                     - v1.0.3
-! 1/6/2022 - Overloaded function equal() to accept strings  - v1.0.4
+! 1/6/2022 - Overloaded function equal() to accept strings  - v1.0.4 (current)
 !------------------------------------------------------------------------------
 module stringmod
 
