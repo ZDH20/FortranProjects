@@ -11,15 +11,22 @@
 !> Provides string support using a character array.
 !
 ! REVISION HISTORY:
+! 
 ! 1/4/2022 - Initial Version
-! 1/5/2022 - Added the equal() function                      - v1.0.1
+! 
+! 1/5/2022 - Added the equal() function             - v1.0.1
+! 
 ! 1/6/2022 - Added the remove() function 
-!            Added the  trim() function                      - v1.0.2
-! 1/6/2022 - Added safety to functions.                      - v1.0.3
-! 1/6/2022 - Overloaded function equal() to accept strings   - v1.0.4
+!          - Added the  trim() function             - v1.0.2
+! 
+! 1/6/2022 - Added safety to functions.             - v1.0.3
+! 
+! 1/6/2022 - Overloaded function equal()            - v1.0.4
+! 
 ! 1/6/2022 - Added concat() function (overloaded)
-!            removed assign() function                       
-!            removed clear() function                        - v1.0.5 (current)
+!          - removed assign() function
+!          - removed clear() function
+!          - fixed memory leaks and invalid jumps   - v1.0.5 (current)
 !------------------------------------------------------------------------------
 module stringmod
 
@@ -53,7 +60,7 @@ module stringmod
         integer::                                       maxsize
         integer::                                       index
         integer::                                       panic
-        logical, private::                              big, created = .false.
+        logical, private::                              big = .false., created = .false.
     end type string
 
     ! public interfaces
@@ -69,7 +76,7 @@ module stringmod
         procedure::remove_front_and_back_whitespace
     end interface trim
 
-    interface toint
+    interface toint ! todo
         procedure::string_to_integer
     end interface toint
 
@@ -398,7 +405,7 @@ contains
         else
             multiple = this%currentsize + 1
         end if
-        
+
         this%maxsize = multiple
 
         do i = 1, this%currentsize
