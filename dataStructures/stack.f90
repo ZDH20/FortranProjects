@@ -1,7 +1,19 @@
-! author: zachary haskins
-! date: 1/1/2022
-! dynamic stack
-
+!------------------------------------------------------------------------------
+! Dynamic Stack 
+!------------------------------------------------------------------------------
+!
+! MODULE: stackmod
+!
+!> @author
+!> Zachary Haskins}
+!
+! DESCRIPTION: 
+!> Provides support for a dynamic stack
+!
+! REVISION HISTORY:
+! 1/1/2022  - Initial Version       - 1.0
+! 1/10/2022 - Fixed memory leaks    - 1.0.1
+!------------------------------------------------------------------------------
 module stackmod
     implicit none
     private
@@ -80,7 +92,7 @@ contains
         if(associated(this%head)) then
             temp => this%head
             this%head => this%head%next
-            deallocate(temp%data)
+            deallocate(temp)
             this%size = this%size - 1
         end if
     end subroutine pop_node
@@ -92,7 +104,7 @@ contains
         do while(associated(this%head))
             temp => this%head
             this%head => this%head%next
-            deallocate(temp%data)
+            deallocate(temp)
         end do
         this%size = 0
     end subroutine destroy_stack
